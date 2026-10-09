@@ -49,12 +49,13 @@ def cmd_init(args: argparse.Namespace) -> None:
 def cmd_seed(args: argparse.Namespace) -> None:
     """Insert demo users.
 
-    bob / bobpass       (owner)
-    admin / adminpass   (admin)
+    bob / bobpass        (owner)
+    admin / adminpass    (admin)
+    student1 / studentpass (student)
     """
     from app.database import ensure_db_and_tables, get_cli_session
     from app.repositories.user import UserRepository
-    from app.schemas.user import AdminCreate, OwnerCreate
+    from app.schemas.user import AdminCreate, OwnerCreate, RegularUserCreate
     from app.utilities.security import encrypt_password
 
     _ensure_models_loaded()
@@ -63,6 +64,7 @@ def cmd_seed(args: argparse.Namespace) -> None:
     demo_users = [
         ("bob", "bobpass", "owner"),
         ("admin", "adminpass", "admin"),
+        ("student1", "studentpass", "student"),
     ]
 
     created = 0
@@ -74,7 +76,12 @@ def cmd_seed(args: argparse.Namespace) -> None:
                 print(f"  skip  {username} (already exists)")
                 skipped += 1
                 continue
-            payload_cls = AdminCreate if role == "admin" else OwnerCreate
+            if role == "admin":
+                payload_cls = AdminCreate
+            elif role == "owner":
+                payload_cls = OwnerCreate
+            else:
+                payload_cls = RegularUserCreate
             repo.create(
                 payload_cls(
                     username=username,
@@ -86,7 +93,7 @@ def cmd_seed(args: argparse.Namespace) -> None:
             created += 1
 
     print(f"Seed done — created {created}, skipped {skipped}.")
-    print("Login with bob/bobpass or admin/adminpass")
+    print("Login with bob/bobpass, admin/adminpass, or student1/studentpass")
 
 
 def cmd_run(args: argparse.Namespace) -> None:

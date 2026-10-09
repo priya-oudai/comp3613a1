@@ -95,8 +95,6 @@ python manage.py init
 | `bob`    | `bobpass`   | owner        |
 | `admin`  | `adminpass` | admin        |
 
-For the student-side workflows, create a student account from the app’s register page before testing the booking/review flows. The seeded demo accounts are owner/admin only.
-
 Flags:
 
 ```bash

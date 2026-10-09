@@ -345,8 +345,7 @@ Every account a marker needs, including extra users you added. Starter accounts:
 
 - bob / bobpass — owner
 - admin / adminpass — admin
-
-Before testing the student-side workflows, create a separate student account from the app register page. The seeded demo accounts are owner/admin only; the student booking and review flows require a student role account.
+- student1 / studentpass — student
 
 <!-- student-build:code-check
 workflow: Search and View a Property (Student)
