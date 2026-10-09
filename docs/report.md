@@ -335,7 +335,9 @@ note: Student binds reviewer name and Student ID in the thin review action and p
 
 Phase 6. Public Render URL (not localhost). Markers open this to mark the three workflows.
 
-https://
+https://faststarter-db0v.onrender.com
+
+Health check: https://faststarter-db0v.onrender.com/health responds successfully.
 
 ## Logins
 
@@ -343,6 +345,8 @@ Every account a marker needs, including extra users you added. Starter accounts:
 
 - bob / bobpass — owner
 - admin / adminpass — admin
+
+Before testing the student-side workflows, create a separate student account from the app register page. The seeded demo accounts are owner/admin only; the student booking and review flows require a student role account.
 
 <!-- student-build:code-check
 workflow: Search and View a Property (Student)
