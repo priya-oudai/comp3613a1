@@ -1,0 +1,35 @@
+@startuml
+!pragma layout smetana
+skinparam shadowing false
+skinparam actorBorderColor #1B365D
+skinparam actorFontColor #1E232D
+skinparam usecaseBackgroundColor #FFFFFF
+skinparam usecaseBorderColor #1B365D
+skinparam usecaseFontColor #1E232D
+skinparam rectangleBorderColor #1B365D
+skinparam rectangleBackgroundColor #F8FAFC
+skinparam arrowColor #1B365D
+
+actor "Owner" as Owner
+
+rectangle "Student Accommodation" {
+  usecase "List a Property" as List_a_Property
+  usecase "Confirm Booking" as Confirm_Booking
+  usecase "Search and View a Property" as Search_and_View_a_Property
+  usecase "View Listing Details" as View_Listing_Details
+  usecase "View Reviews" as View_Reviews
+  usecase "Book a Property and Leave a Review" as Book_a_Property_and_Leave_a_Review
+  usecase "Leave a Review" as Leave_a_Review
+}
+
+actor "Student" as Student
+
+Owner --> List_a_Property
+Owner --> Confirm_Booking
+Search_and_View_a_Property <-- Student
+Search_and_View_a_Property ..> View_Listing_Details : <<extend>>
+Search_and_View_a_Property ..> View_Reviews : <<extend>>
+Book_a_Property_and_Leave_a_Review <-- Student
+Book_a_Property_and_Leave_a_Review ..> Leave_a_Review : <<extend>>
+
+@enduml

@@ -1,0 +1,38 @@
+{% extends "authenticated-base.html" %}
+{% block title %}My bookings{% endblock %}
+
+{% block subpage_content %}
+<div class="container py-3">
+  <section>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-2 mb-3">
+      <div>
+        <h1 class="h2 mb-1">My bookings</h1>
+        <p class="text-muted mb-0">Track your accommodation requests.</p>
+      </div>
+      <a class="btn btn-outline-primary" href="{{ url_for('user_home_view') }}">Search properties</a>
+    </div>
+    <div class="property-bookings-list">
+      {% for booking in bookings %}
+        <article class="page-card student-booking-card">
+          <div>
+            <h2 class="h5 mb-1">{{ booking.property.title }}</h2>
+            <p class="text-muted mb-2">{{ booking.property.location }}</p>
+            <p class="mb-1">{{ booking.check_in }} → {{ booking.check_out }}</p>
+            <span class="status-pill status-{{ booking.status }}">{{ booking.status }}</span>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <a class="btn btn-outline-primary" href="{{ url_for('property_detail_view', property_id=booking.property_id) }}">View Property</a>
+            {% if booking.status in ["pending", "confirmed"] and not booking.review %}
+              <a class="btn btn-primary" href="{{ url_for('property_detail_view', property_id=booking.property_id) }}#leave-review">Leave a Review</a>
+            {% endif %}
+          </div>
+        </article>
+      {% else %}
+        <div class="page-card">
+          <p class="text-muted mb-0">No bookings yet. Search for a property to send a request.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

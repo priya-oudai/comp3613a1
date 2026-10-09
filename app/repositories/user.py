@@ -27,9 +27,7 @@ class UserRepository:
         offset = (page - 1) * limit
         db_qry = select(User)
         if query:
-            db_qry = db_qry.where(
-                User.username.ilike(f"%{query}%") | User.email.ilike(f"%{query}%")
-            )
+            db_qry = db_qry.where(User.username.ilike(f"%{query}%"))
         count_qry = select(func.count()).select_from(db_qry.subquery())
         count_todos = self.db.exec(count_qry).one()
 
@@ -53,8 +51,6 @@ class UserRepository:
             raise Exception("Invalid user id given")
         if user_data.username:
             user.username = user_data.username
-        if user_data.email:
-            user.email = user_data.email
         
         try:
             self.db.add(user)

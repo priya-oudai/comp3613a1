@@ -1,0 +1,38 @@
+{% extends "authenticated-base.html" %}
+{% block title %}Confirm Booking{% endblock %}
+
+{% block subpage_content %}
+<div class="container-fluid py-2">
+  <div class="page-card mb-4">
+    <p class="eyebrow">New requests</p>
+    <h1 class="h2 mb-0">Confirm Booking</h1>
+  </div>
+
+  <div class="d-grid gap-3">
+    {% for booking in pending_bookings %}
+      <div class="page-card d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+          <h2 class="h5 mb-1">{{ booking.property.title }} — {{ booking.property.location }}</h2>
+          <p class="text-muted mb-1">Requested by {{ booking.student.username }}</p>
+          <p class="small text-muted mb-1">Requested {{ booking.request_date.strftime("%b %d, %Y") }}</p>
+          <p class="small text-muted mb-0">{{ booking.check_in }} → {{ booking.check_out }}</p>
+        </div>
+        <div class="d-flex gap-2">
+          <form method="POST" action="{{ url_for('owner_booking_status_action', booking_id=booking.id) }}">
+            <input type="hidden" name="action" value="confirm">
+            <button class="btn btn-primary" type="submit">Confirm</button>
+          </form>
+          <form method="POST" action="{{ url_for('owner_booking_status_action', booking_id=booking.id) }}">
+            <input type="hidden" name="action" value="reject">
+            <button class="btn btn-outline-danger" type="submit">Reject</button>
+          </form>
+        </div>
+      </div>
+    {% else %}
+      <div class="page-card">
+        <p class="text-muted mb-0">There are no new booking requests.</p>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

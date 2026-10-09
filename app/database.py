@@ -3,6 +3,7 @@ import threading
 import time
 from contextlib import contextmanager
 
+from sqlalchemy import inspect, text
 from sqlalchemy.exc import DBAPIError, OperationalError, ProgrammingError
 from sqlmodel import SQLModel, Session, create_engine
 
@@ -38,6 +39,45 @@ def create_db_and_tables() -> None:
     import app.models  # noqa: F401
 
     SQLModel.metadata.create_all(engine)
+    with engine.begin() as connection:
+        booking_columns = {
+            column["name"] for column in inspect(connection).get_columns("booking")
+        }
+        if "request_date" not in booking_columns:
+            connection.execute(text("ALTER TABLE booking ADD COLUMN request_date DATE"))
+            connection.execute(
+                text(
+                    "UPDATE booking SET request_date = CURRENT_DATE "
+                    "WHERE request_date IS NULL"
+                )
+            )
+            logger.info("Added booking.request_date database column")
+
+        review_columns = {
+            column["name"] for column in inspect(connection).get_columns("review")
+        }
+        for column_name in ("reviewer_name", "student_id"):
+            if column_name not in review_columns:
+                connection.execute(
+                    text(
+                        f"ALTER TABLE review ADD COLUMN {column_name} "
+                        "VARCHAR NOT NULL DEFAULT ''"
+                    )
+                )
+                logger.info("Added review.%s database column", column_name)
+        if "created_at" not in review_columns:
+            connection.execute(
+                text(
+                    "ALTER TABLE review ADD COLUMN created_at TIMESTAMP"
+                )
+            )
+            connection.execute(
+                text(
+                    "UPDATE review SET created_at = CURRENT_TIMESTAMP "
+                    "WHERE created_at IS NULL"
+                )
+            )
+            logger.info("Added review.created_at database column")
 
 
 def drop_all() -> None:

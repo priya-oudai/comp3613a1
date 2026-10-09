@@ -92,7 +92,7 @@ python manage.py init
 
 | Username | Password    | Role         |
 |----------|-------------|--------------|
-| `bob`    | `bobpass`   | regular_user |
+| `bob`    | `bobpass`   | owner        |
 | `admin`  | `adminpass` | admin        |
 
 Flags:

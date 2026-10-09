@@ -1,0 +1,24 @@
+{
+  "system": "Student Accommodation",
+  "actors": [
+    {"name": "Owner", "side": "left"},
+    {"name": "Student", "side": "right"}
+  ],
+  "use_cases": [
+    {"name": "List a Property", "actors": ["Owner"]},
+    {"name": "Confirm Booking", "actors": ["Owner"]},
+    {
+      "name": "Search and View a Property",
+      "actors": ["Student"],
+      "extends": ["View Listing Details", "View Reviews"]
+    },
+    {"name": "View Listing Details"},
+    {"name": "View Reviews"},
+    {
+      "name": "Book a Property and Leave a Review",
+      "actors": ["Student"],
+      "extends": ["Leave a Review"]
+    },
+    {"name": "Leave a Review"}
+  ]
+}

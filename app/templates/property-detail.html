@@ -1,0 +1,111 @@
+{% extends "authenticated-base.html" %}
+{% block title %}{{ property.title }}{% endblock %}
+
+{% block subpage_content %}
+<div class="container py-3">
+  <a class="text-decoration-none" href="{{ url_for('user_home_view') }}">← Back to search</a>
+
+  {% if request_sent_booking %}
+    <div class="page-card mt-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <h2 class="h5 mb-1">Request sent</h2>
+        <p class="text-muted mb-0">Status: Pending owner approval.</p>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <a class="btn btn-outline-primary" href="{{ url_for('my_bookings_view') }}">View my bookings</a>
+        {% if not request_sent_booking.review %}
+          <a class="btn btn-primary" href="{{ url_for('property_detail_view', property_id=property.id) }}#leave-review">Leave a Review</a>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+
+  <section class="page-card property-detail-layout mt-3">
+    <img class="property-detail-image" src="{{ url_for('static', path='img/property-placeholder.svg') }}" alt="Property photo placeholder">
+    <div class="property-detail-summary">
+      <h1 class="h2 mb-1">{{ property.title }}</h1>
+      <p class="text-muted mb-2">{{ property.location }}</p>
+      <p class="mb-2">Owner: {{ property.owner.username if property.owner else "Property owner" }}</p>
+      <p class="property-price mb-3">TT${{ '%.2f'|format(property.price) }}/month · {{ property.property_type|replace("-", " ")|title }}</p>
+      {% if not is_owner %}
+        <a class="btn btn-primary" href="{{ url_for('property_booking_view', property_id=property.id) }}">Book This Room</a>
+        <a class="property-reviews-link d-block mt-2" href="{{ url_for('property_reviews_view', property_id=property.id) }}">View Reviews</a>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="page-card mt-4">
+    <h2 class="h5 mb-2">Description</h2>
+    <p class="mb-0">{{ property.description }}</p>
+  </section>
+
+  {% if student_booking and student_booking.status in ['pending', 'confirmed'] and not student_booking.review %}
+    <section class="page-card mt-4 review-form-card" id="leave-review">
+      <a class="text-decoration-none" href="{{ url_for('property_booking_view', property_id=property.id) }}">← Back to Book a Property</a>
+      <h2 class="h5 mt-3 mb-1">Leave a review</h2>
+      <p class="text-muted mb-3">We appreciate your feedback :)</p>
+      <div class="mb-3">
+        <h3 class="h6 mb-1">{{ property.title }}</h3>
+        <p class="text-muted mb-0">{{ property.location }}</p>
+      </div>
+      <form method="POST" action="{{ url_for('review_action', property_id=property.id, booking_id=student_booking.id) }}">
+        <div class="mb-3">
+          <label class="form-label" for="rating">Rating</label>
+          <select class="form-select" id="rating" name="rating">
+            <option value="5">5 stars</option>
+            <option value="4">4 stars</option>
+            <option value="3">3 stars</option>
+            <option value="2">2 stars</option>
+            <option value="1">1 star</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="comment">Comment</label>
+          <textarea class="form-control" id="comment" name="comment" rows="3"></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="reviewer_name">Your Name</label>
+          <input class="form-control" type="text" id="reviewer_name" name="reviewer_name" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="student_id">Enter your Student ID</label>
+          <input class="form-control" type="text" id="student_id" name="student_id" required>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="btn btn-primary" type="submit">Submit review</button>
+          <a class="btn btn-outline-secondary" href="{{ url_for('property_detail_view', property_id=property.id) }}">Cancel Review</a>
+        </div>
+      </form>
+    </section>
+  {% endif %}
+
+  {% if is_owner %}
+    <section class="page-card mt-4">
+      <h2 class="h5 mb-3">Booking requests</h2>
+      {% if bookings_for_owner %}
+        {% for booking in bookings_for_owner %}
+          <div class="booking-request">
+            <div class="fw-semibold">{{ booking.student.username }} · {{ booking.status }}</div>
+            <div class="small text-muted">{{ booking.check_in }} → {{ booking.check_out }}</div>
+            {% if booking.notes %}<div class="small mt-2">{{ booking.notes }}</div>{% endif %}
+            {% if booking.status == "pending" %}
+              <div class="mt-2 d-flex gap-2">
+                <form method="POST" action="{{ url_for('booking_status_action', property_id=property.id, booking_id=booking.id) }}">
+                  <input type="hidden" name="action" value="confirm">
+                  <button class="btn btn-sm btn-primary" type="submit">Confirm</button>
+                </form>
+                <form method="POST" action="{{ url_for('booking_status_action', property_id=property.id, booking_id=booking.id) }}">
+                  <input type="hidden" name="action" value="reject">
+                  <button class="btn btn-sm btn-outline-danger" type="submit">Reject</button>
+                </form>
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-muted mb-0">No bookings for this property yet.</p>
+      {% endif %}
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

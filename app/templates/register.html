@@ -5,7 +5,7 @@
 <div class="auth-shell">
   <div class="auth-panel">
     <a class="auth-back" href="{{ url_for('index_view') }}">← Home</a>
-    <div class="brand-wordmark">FastStarter</div>
+    <div class="brand-wordmark">SettleIn</div>
     <p class="auth-tagline">Create an account</p>
 
     <form method="POST" action="{{ url_for('register_view') }}">
@@ -14,8 +14,11 @@
         <input class="form-control" type="text" id="username" name="username" required autofocus>
       </div>
       <div class="mb-3">
-        <label class="form-label" for="email">Email</label>
-        <input class="form-control" type="email" id="email" name="email" required>
+        <label class="form-label" for="role">Account role</label>
+        <select class="form-select" id="role" name="role" required>
+          <option value="student">Student</option>
+          <option value="owner">Owner</option>
+        </select>
       </div>
       <div class="mb-3">
         <label class="form-label" for="password">Password</label>

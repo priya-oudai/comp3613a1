@@ -4,57 +4,43 @@
 <style>
     body {
         overflow-x: hidden;
-        background: #f4f6f8;
+        background: var(--brand-bg);
     }
 
     #wrapper {
-        display: flex;
         min-height: 100vh;
-    }
-
-    #sidebar {
-        min-width: 250px;
-        max-width: 250px;
-        min-height: 100vh;
-        transition: all 0.3s;
-        background: var(--brand-sidebar);
-        color: #fff;
-    }
-
-    #sidebar.collapsed {
-        margin-left: -250px;
-    }
-
-    #sidebar .nav-link {
-        color: var(--brand-sidebar-text);
-        font-weight: 500;
-    }
-
-    #sidebar .nav-link:hover,
-    #sidebar .nav-link.active {
-        color: #fff;
-        background-color: color-mix(in srgb, var(--brand-accent) 55%, #000);
-        border-radius: 0.5rem;
-    }
-
-    #sidebar .brand-wordmark {
-        color: #fff;
-        font-size: 1.25rem;
-        text-align: center;
-        margin: 1rem 0 1.5rem;
     }
 
     #content {
         width: 100%;
         padding: 1rem;
-        transition: all 0.3s;
         display: flex;
         flex-direction: column;
-        background-color: #f4f6f8;
+        background-color: var(--brand-bg);
     }
 
     .navbar {
         border-bottom: 1px solid #dee2e6;
+    }
+
+    .owner-top-nav .owner-brand,
+    .student-top-nav .student-brand {
+        color: var(--brand-ink);
+        font-size: 1.25rem;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .owner-top-nav .owner-nav-link,
+    .student-top-nav .student-nav-link {
+        color: var(--brand-ink);
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    .owner-top-nav .owner-nav-link.active,
+    .student-top-nav .student-nav-link.active {
+        font-weight: 700;
     }
 </style>
 {% block additional_styles %}{% endblock %}
@@ -62,35 +48,43 @@
 
 {% block content %}
 <div id="wrapper">
-    <nav id="sidebar" class="p-3 d-flex flex-column vh-100">
-        <div class="brand-wordmark">FastStarter</div>
-
-        <ul class="nav nav-pills flex-column gap-2 flex-grow-1">
-            <li class="nav-item">
-                <a class="nav-link d-flex align-items-center {{ 'active' if request.url.path.startswith('/app') }}"
-                   href="{{ url_for('user_home_view') }}">
-                    <span class="material-symbols-outlined me-2">home</span>
-                    Home
-                </a>
-            </li>
-            <li class="nav-item mt-auto">
-                <a class="nav-link d-flex align-items-center text-danger" href="{{ url_for('logout') }}">
-                    <span class="material-symbols-outlined me-2">logout</span>
-                    Logout
-                </a>
-            </li>
-        </ul>
-    </nav>
-
     <div id="content">
-        <nav class="navbar navbar-expand-lg bg-white mb-4 px-3 rounded-3 shadow-sm">
-            <button class="btn btn-outline-secondary" id="menu-toggle" type="button">
-                <span class="material-symbols-outlined md-dark">menu</span>
-            </button>
-            <div class="ms-auto d-flex align-items-center gap-3">
-                <span class="fw-semibold">Welcome, {{ user.username }}</span>
+        {% if user.role == "owner" %}
+        <nav class="navbar navbar-expand-lg owner-top-nav mb-4 px-3 py-3 rounded-3 shadow-sm">
+            <a class="owner-brand" href="{{ url_for('user_home_view') }}">SettleIn</a>
+            <div class="ms-auto d-flex align-items-center gap-3 flex-wrap">
+                <a
+                    class="owner-nav-link {{ 'active' if request.url.path in ['/app', '/properties/new'] else '' }}"
+                    href="{{ url_for('user_home_view') }}"
+                    {% if request.url.path in ['/app', '/properties/new'] %}aria-current="page"{% endif %}
+                >List a Property</a>
+                <a
+                    class="owner-nav-link {{ 'active' if request.url.path.startswith('/owner/bookings') else '' }}"
+                    href="{{ url_for('owner_booking_requests_view') }}"
+                    {% if request.url.path.startswith('/owner/bookings') %}aria-current="page"{% endif %}
+                >Confirm Booking</a>
+                <a class="owner-nav-link" href="{{ url_for('logout') }}">Log out</a>
             </div>
         </nav>
+        {% else %}
+        <nav class="navbar navbar-expand-lg student-top-nav mb-2 px-3 py-3 rounded-3 shadow-sm">
+            <a class="student-brand" href="{{ url_for('user_home_view') }}">SettleIn</a>
+            <div class="ms-auto d-flex align-items-center gap-3 flex-wrap">
+                <a
+                    class="student-nav-link {{ 'active' if request.url.path == '/app' or (request.url.path.startswith('/properties/') and not request.url.path.endswith('/book')) else '' }}"
+                    href="{{ url_for('user_home_view') }}"
+                    {% if request.url.path == '/app' or (request.url.path.startswith('/properties/') and not request.url.path.endswith('/book')) %}aria-current="page"{% endif %}
+                >Search</a>
+                <a
+                    class="student-nav-link {{ 'active' if request.url.path == '/bookings' or request.url.path.endswith('/book') else '' }}"
+                    href="{{ url_for('my_bookings_view') }}"
+                    {% if request.url.path == '/bookings' or request.url.path.endswith('/book') %}aria-current="page"{% endif %}
+                >My bookings</a>
+                <a class="student-nav-link" href="{{ url_for('logout') }}">Log out</a>
+            </div>
+        </nav>
+        <p class="student-welcome">Welcome, {{ user.username }}</p>
+        {% endif %}
 
         <div class="row">
             <div class="col-12">
@@ -104,10 +98,5 @@
     </div>
 </div>
 
-<script>
-    document.getElementById("menu-toggle").addEventListener("click", function () {
-        document.getElementById("sidebar").classList.toggle("collapsed");
-    });
-</script>
 {% block subpage_scripts %}{% endblock %}
 {% endblock %}

@@ -1,6 +1,6 @@
 from app.repositories.user import UserRepository
 from app.utilities.security import encrypt_password, verify_password, create_access_token
-from app.schemas.user import RegularUserCreate
+from app.models.user import UserBase
 from typing import Optional
 
 class AuthService:
@@ -14,10 +14,12 @@ class AuthService:
         access_token = create_access_token(data={"sub": f"{user.id}", "role": user.role})
         return access_token
 
-    def register_user(self, username: str, email: str, password: str):
-        new_user = RegularUserCreate(
+    def register_user(self, username: str, password: str, role: str):
+        if role not in {"student", "owner"}:
+            raise ValueError("Choose either the student or owner role")
+        new_user = UserBase(
             username=username, 
-            email=email, 
+            role=role,
             password=encrypt_password(password)
         )
         return self.user_repo.create(new_user)

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-labelledby="title">
+  <title id="title">SettleIn property photo placeholder</title>
+  <rect width="800" height="450" fill="#eee9df"/>
+  <rect x="90" y="95" width="620" height="275" rx="24" fill="#d8e0d3"/>
+  <circle cx="270" cy="185" r="38" fill="#f7f2e8"/>
+  <path d="M130 330 300 205l105 78 105-95 160 142H130Z" fill="#78917e"/>
+  <path d="M130 330h540v24H130z" fill="#31564b"/>
+  <text x="400" y="414" text-anchor="middle" fill="#31564b" font-family="Arial, sans-serif" font-size="24">SettleIn property</text>
+</svg>

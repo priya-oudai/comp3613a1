@@ -1,0 +1,98 @@
+{% extends "authenticated-base.html" %}
+{% block title %}List a property{% endblock %}
+
+{% block subpage_content %}
+<div class="container py-3">
+  <div class="page-card mx-auto" style="max-width: 720px;">
+    <p class="eyebrow">Owner workflow</p>
+    <h1 class="h3 mb-3">List a property</h1>
+    <img class="property-form-preview mb-2" src="{{ url_for('static', path='img/property-placeholder.svg') }}" alt="Property photo placeholder">
+    <p class="small text-muted mb-3">Property photos are not uploaded yet; this placeholder will appear on the listing.</p>
+    <form
+      id="property-form"
+      data-draft-key="settlein-property-draft-{{ user.id }}"
+      method="POST"
+      action="{{ url_for('property_create_action') }}"
+    >
+      <h2 class="h5 mb-3">Property Details</h2>
+      <div class="row g-3">
+        <div class="col-md-8">
+          <label class="form-label" for="title">Property title</label>
+          <input class="form-control" id="title" name="title" placeholder="Enter property title" required>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="price">Price per month</label>
+          <input class="form-control" id="price" name="price" type="number" min="0" step="0.01" placeholder="TT$" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="location">Location</label>
+          <input class="form-control" id="location" name="location" placeholder="Enter property location" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="property_type">Property type</label>
+          <select class="form-select" id="property_type" name="property_type">
+            <option value="studio">Studio</option>
+            <option value="apartment">Apartment</option>
+            <option value="house">House</option>
+            <option value="shared-room">Shared room</option>
+          </select>
+        </div>
+        <div class="col-12">
+          <label class="form-label" for="description">Description</label>
+          <textarea class="form-control" id="description" name="description" rows="5" required></textarea>
+        </div>
+      </div>
+      <p id="draft-status" class="small text-muted mt-3 mb-0" aria-live="polite"></p>
+      <div class="d-flex justify-content-between align-items-center mt-4">
+        <a class="btn btn-outline-secondary" href="{{ url_for('user_home_view') }}">Back</a>
+        <div class="d-flex gap-2 flex-wrap justify-content-end">
+          <a class="btn btn-outline-secondary" id="cancel-draft" href="{{ url_for('user_home_view') }}">Cancel</a>
+          <button class="btn btn-outline-primary" id="save-draft" type="button">Save Draft</button>
+          <button class="btn btn-primary" type="submit">Publish listing</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block subpage_scripts %}
+<script>
+  (() => {
+    const form = document.getElementById("property-form");
+    const draftKey = form.dataset.draftKey;
+    const fields = ["title", "location", "price", "property_type", "description"];
+    const draftStatus = document.getElementById("draft-status");
+
+    for (const fieldName of fields) {
+      const savedValue = sessionStorage.getItem(`${draftKey}:${fieldName}`);
+      if (savedValue !== null) {
+        form.elements.namedItem(fieldName).value = savedValue;
+        draftStatus.textContent = "Draft restored from this browser session.";
+      }
+    }
+
+    document.getElementById("save-draft").addEventListener("click", () => {
+      for (const fieldName of fields) {
+        sessionStorage.setItem(
+          `${draftKey}:${fieldName}`,
+          form.elements.namedItem(fieldName).value,
+        );
+      }
+      draftStatus.textContent = "Draft saved for this browser session.";
+    });
+
+    document.getElementById("cancel-draft").addEventListener("click", () => {
+      for (const fieldName of fields) {
+        sessionStorage.removeItem(`${draftKey}:${fieldName}`);
+      }
+    });
+
+    form.addEventListener("submit", () => {
+      for (const fieldName of fields) {
+        sessionStorage.removeItem(`${draftKey}:${fieldName}`);
+      }
+    });
+  })();
+</script>
+{% endblock %}
