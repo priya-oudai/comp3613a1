@@ -1,8 +1,18 @@
+<!-- student-build:skill-integrity
+status: pass
+root: e84cd692d0b85eefe546385661958c27d07e8be6c5176a82012f68ccff5c8beb
+expected_root: e84cd692d0b85eefe546385661958c27d07e8be6c5176a82012f68ccff5c8beb
+mismatches: none
+-->
+
 # COMP 3613 Assignment 1
 
-Draft this file with the Guide. **Update it after every phase milestone** before you pause. The use-case diagram is a UML PNG at `docs/diagrams/use-case.png`, linked from this file as `diagrams/use-case.png` (path relative to `docs/report.md`). The model diagram is Mermaid. **Embed wireframe images** as `wireframes/<file>` (files live in `docs/wireframes/`).
+YouTube: https://youtu.be/pW2NlXFtrAo
 
-Do not put your student ID in this file if you will commit it. The PDF cover adds your name and ID at export time.
+GitHub: https://github.com/priya-oudai/comp3613a1
+
+Agent: GitHub Copilot (Agent mode)
+
 
 ## Assigned project
 
@@ -10,17 +20,35 @@ Student Accommodation
 
 ## Three workflows
 
-### 1.
+### 1. 
 
 List a Property (Owner)
+
+The owner acts.
+
+Steps: When an owner logs in for the first time, they see a "List a Property" button and a message saying they have no listings yet. An owner who has already published properties sees the same button, with their existing listings underneath. The owner clicks "List a Property" and fills in the property details form. From there they can Cancel, Save Draft, or Publish Listing.
+
+Done: The owner publishes the listing and the new property appears in their list of listings, visible to students.
 
 ### 2.
 
 Search and View a Property (Student)
 
+Student acts.
+
+Steps: When a student logs in, they see a page listing the available properties, along with a count of how many were found. A search bar lets them search by title or location, and the Price and Type filters help them narrow the list to find a place that suits them. Each property has a View Details button, which opens a page with more information about it. From there the student can click "view reviews" to read the reviews other students have posted for that property, or click "Book This Room" to go to the booking page.
+
+Done: The student has found a property and viewed its details and reviews.
+
 ### 3.
 
 Book a Property and Leave a Review (Student)
+
+The student acts. The owner then confirms or rejects the request.
+
+Steps: From a property's details page, the student clicks "Book This Room", which opens the booking request page. There they enter their move-in and move-out dates and can add an optional message to the owner, then click "Send Booking Request" or "Cancel". After sending, the student can open "My bookings" in the top navigation bar to see every booking they have made, each with its status: pending, confirmed or rejected. A student can leave one review for a property they have booked, as long as the booking status is pending or confirmed. After submitting a review, they cannot submit another for that booking unless they make a new booking. The owner decides each request on the Confirm Booking page by clicking Confirm or Reject.
+
+Done: The booking request is sent and appears in My bookings with its status, the student's review is saved, and the owner has confirmed or rejected the request.
 
 ## Use case diagram
 
@@ -30,32 +58,32 @@ Assumption: Search and View a Property extends View Listing Details and View Rev
 
 ## Model diagram
 
-Updated in Phase 5 to match the implemented SQLModel fields, foreign keys, and review/booking lifecycle.
+Updated to match the SQLModel entities, field constraints, defaults, and relationships in `app/models/`.
 
 ```mermaid
 erDiagram
   User ||--o{ Property : owns
-  User ||--o{ Booking : requests
+  User ||--o{ Booking : books
   Property ||--o{ Booking : receives
   Property ||--o{ Review : has
-  User ||--o{ Review : writes
+  User ||--o{ Review : reviews
   Booking ||--o| Review : may_receive
 
   User {
     int id PK
-    string username
+    string username UK
     string password
     string role
   }
 
   Property {
     int id PK
-    int owner_id FK
     string title
     string location
     string property_type
-    float price
     string description
+    float price
+    int owner_id FK
   }
 
   Booking {
@@ -82,13 +110,11 @@ erDiagram
   }
 ```
 
-Model revision: the ERD now follows the implemented `id`/snake_case field names. `Booking` includes check-in/out dates, notes, request date, and the pending/confirmed/rejected status; it has no separate confirmation date. `Review` links directly to its Property and reviewer User as well as its Booking, stores reviewer name and Student ID, and automatically records `created_at` when submitted (not entered by the student). A unique `Review.booking_id` means each booking can have at most one review. Students may review a pending or confirmed booking; rejected bookings cannot be reviewed. Review cancellation is a navigation action and does not add an entity or persisted field.
+Model revision: this update aligns the ERD with the implemented SQLModel names and constraints. It now marks `User.username` as unique; documents required, indexed foreign keys from Property, Booking, and Review to their owning User, Property, Booking, or reviewer; and makes clear that a Booking can have at most one Review because `Review.booking_id` is unique. The diagram now includes the implemented `Booking` check-in/check-out dates and the separate Review `reviewer_name`, `student_id`, and automatically generated `created_at` fields. In the code, Property price is nonnegative and defaults to 0, property type defaults to `studio`, description and booking notes default to empty strings, Booking request date defaults to today, and its status defaults to `pending` and is restricted to `pending`, `confirmed`, or `rejected`. Review rating defaults to 5 and is restricted to 1–5; its comment defaults to empty text. A review timestamp is generated automatically. There is no confirmation-date field. Students may review pending or confirmed bookings; rejected bookings cannot be reviewed. Review cancellation is navigation only and adds no persisted field.
 
 ## Wireframes
 
 ### List a Property and Confirm Booking
-
-![List a Property and Confirm Booking](wireframes/List%20a%20Property%20and%20Confirm%20Booking.png)
 
 <!-- student-build:wireframe-coverage
 use_case: List a Property (Owner)
@@ -98,8 +124,6 @@ covered: yes
 
 ### Search and View a Property
 
-![Search and View a Property](wireframes/Search%20and%20View%20a%20Property.png)
-
 <!-- student-build:wireframe-coverage
 use_case: Search and View a Property (Student)
 image: docs/wireframes/Search and View a Property.png
@@ -108,8 +132,6 @@ covered: yes
 
 ### Book a Property and Leave a Review
 
-![Book a Property and Leave a Review](wireframes/Book%20a%20Property%20and%20Leave%20a%20Review.png)
-
 <!-- student-build:wireframe-coverage
 use_case: Book a Property and Leave a Review (Student)
 image: docs/wireframes/Book a Property and Leave a Review.png
@@ -117,6 +139,18 @@ covered: yes
 -->
 
 Accepted model revisions: `Booking.status` distinguishes pending/confirmed/rejected, with no completion step; `Review` now stores reviewer name and Student ID from the wireframe. The booking flow immediately presents “View my bookings” and “Leave a Review” after request submission.
+
+### Book a Property and Leave a Review
+
+![Book a Property and Leave a Review](wireframes/Book a Property and Leave a Review.png)
+
+### List a Property and Confirm Booking
+
+![List a Property and Confirm Booking](wireframes/List a Property and Confirm Booking.png)
+
+### Search and View a Property
+
+![Search and View a Property](wireframes/Search and View a Property.png)
 
 ## Theming
 
@@ -140,9 +174,9 @@ Owner navigation now matches the wireframe’s top bar (SettleIn, List a Propert
 
 Booking lifecycle alignment: the only supported states are pending, confirmed, and rejected. Owners can confirm or reject pending requests; the prior completion action was removed. A student with a pending or confirmed request may submit one review; rejected requests cannot be reviewed.
 
-Authentication note: the app stores the JWT in one `access_token` cookie for the `localhost:5000` origin. Logging in as another user in the same browser profile replaces that cookie, so all tabs then authenticate as the latest account. This is expected for the current single-account-per-browser-session design; use separate browser profiles or an incognito window to test simultaneous roles.
+Authentication note: the app stores the JWT in one `access_token` cookie per site origin. Logging in as another user in the same browser profile replaces that cookie, so all tabs then authenticate as the latest account. To test owner and student at the same time on the live site, markers should use two browsers or an incognito window.
 
-Earlier Phase 5 verification: student confirmed that the owner and student workflows, including role-specific navigation, property listing, booking confirmation/rejection, booking-request actions, and review submission, work as expected. The subsequent Search and View polish below still needs the student's local verification.
+Earlier Phase 5 verification: student confirmed that the owner and student workflows, including role-specific navigation, property listing, booking confirmation/rejection, booking-request actions, and review submission, work as expected.
 
 Search and View polish: the student completed Property model, repository, service, and thin-route snippets. Search now has the requested title/subtitle, price bands (under TT$1,500; TT$1,500–2,500; over TT$2,500), type filter, result count, and horizontal result cards. Price-band comparisons keep the boundary values in the middle band only. Student navigation is a top bar with Search, My bookings, and Log out; My bookings opens its own page. Property details place the placeholder photo beside the title, location, owner, booking action, and reviews link, with the description below. Book This Room opens the booking request form; View Reviews opens the separate property review list. Student verification confirmed the filters, count, cards, details, booking action, and My bookings. The student reported the Leave a Review form needed a Cancel Review action returning to property details; after it was added, the student confirmed it returns to the same property's details without submitting the review.
 
@@ -331,22 +365,6 @@ passed: yes
 note: Student binds reviewer name and Student ID in the thin review action and passes them to the service.
 -->
 
-## Deployed app
-
-Phase 6. Public Render URL (not localhost). Markers open this to mark the three workflows.
-
-https://faststarter-db0v.onrender.com
-
-Health check: https://faststarter-db0v.onrender.com/health responds successfully.
-
-## Logins
-
-Every account a marker needs, including extra users you added. Starter accounts:
-
-- bob / bobpass — owner
-- admin / adminpass — admin
-- student1 / studentpass — student
-
 <!-- student-build:code-check
 workflow: Search and View a Property (Student)
 form: snippet
@@ -397,16 +415,136 @@ passed: yes
 note: Student chose a separate My bookings page because the search wireframe did not show its destination.
 -->
 
+## Deployed app
+
+Phase 6. Public Render URL (not localhost). Markers open this to mark the three workflows.
+
+https://faststarter-db0v.onrender.com
+
+Health check: https://faststarter-db0v.onrender.com/health responds successfully.
+
+GitHub: https://github.com/priya-oudai/comp3613a1
+
+Agent: GitHub Copilot (Agent mode)
+
+## Logins
+
+Every account a marker needs, including extra users you added. Starter accounts:
+
+- bob / bobpass — owner
+- admin / adminpass — admin
+- student1 / studentpass — student
+
+
 ## YouTube URL
+
+[https://youtu.be/pW2NlXFtrAo](https://youtu.be/pW2NlXFtrAo)
 
 ## Session transcripts
 
-Filled when the Guide builds the report: the agent writes each Guide chat to `docs/transcripts/<slug>.md` (Copilot Agent, Cursor, or OpenCode). `python manage.py report` packages them. Do not paste chats here during the build.
+Filled when the Guide builds the report: the agent writes chat markdown into `docs/transcripts/`; `python manage.py report` packages them.
+
+Guide packaged **8** chat(s) in `docs/transcripts/` (and `docs/transcripts.zip`).
+
+Index: [docs/transcripts/INDEX.md](transcripts/INDEX.md)
+
+- [`phase-1-project-and-workflows`](transcripts/phase-1-project-and-workflows.md)
+- [`phase-2-use-cases`](transcripts/phase-2-use-cases.md)
+- [`phase-3-model`](transcripts/phase-3-model.md)
+- [`phase-4-wireframe-coverage`](transcripts/phase-4-wireframe-coverage.md)
+- [`phase-4-wireframes-pending`](transcripts/phase-4-wireframes-pending.md)
+- [`phase-5-theme-build-polish`](transcripts/phase-5-theme-build-polish.md)
+- [`phase-5-wireframe-polish`](transcripts/phase-5-wireframe-polish.md)
+- [`phase-6-deployment-and-report-updates`](transcripts/phase-6-deployment-and-report-updates.md)
 
 ## Competency (student-judge)
 
-Filled when the report is built. Guide runs student-judge, writes `docs/judge.md`, and export appends the scorecard here.
+Filled by Guide from the student-judge run when this report was built.
+
+**Judged at:** 2026-10-11T16:32:12-04:00  
+**Student / session:** Student Accommodation project; Copilot Agent Guide chats  
+**Artifact:** All eight accessible Guide chats saved under `docs/transcripts/`, plus the current report, model sources, diagrams, and wireframes  
+**Phases in evidence:** 1–6 (COMP 3613; Phase 5 polish, Phase 6 deploy; never generic 0–5)  
+**Evidence pass:** re-read native chats and current project artefacts; no prior scorecard used
+
+### Totals
+
+| | Count / value |
+|--|--|
+| Metrics on rubric | 12 (M1–M12) |
+| N/A (excluded) | 0 |
+| Metrics scored | 12 |
+| Scoreable max | 12 × 4 |
+| Awarded total | 44 / 48 |
+| **Overall (avg of scored)** | **3.7 / 4** |
+| Impression mark | 18 / 20 |
+
+## Scorecard
+
+| ID | Metric | Score / 4 | In avg | Evidence |
+|----|--------|----------:|:------:|----------|
+| M1 | Phase discipline | 3 | yes | The student worked through the design phases, completed local polish before deployment, and supplied the live URL. |
+| M2 | Problem framing | 4 | yes | “For search and view a property have an extend use case to view listing details … and book a property should have an extend to leave a review.” |
+| M3 | Decision ownership | 4 | yes | The student named the workflows and model fields, specified `Confirm Booking` as “separate and independant,” and chose the later review path. |
+| M4 | Artefact-before-code | 3 | yes | The report contains the student-named entity model and all three wireframes before the Phase 5 implementation and refinement. |
+| M5 | Verification habit | 4 | yes | “yes everything works”; later the student reported concrete role, booking, route, review, and appearance checks and requested further refinements. |
+| M6 | Assignment fit | 3 | yes | Implementation notes and code-check evidence show ERD/wireframe-led work, role-aware features, and service/repository use; persistence calls were not found in routers during this evidence pass. |
+| M7 | Slice explanation | 4 | yes | The report records model, repository, service, and thin-route snippets; e.g. the student's route “passes query, price band, and type to PropertyService … without persistence logic.” |
+| M8 | Prompt quality | 3 | yes | The student used phase-tagged prompts and gave specific mismatch and polish requests, including Search page controls, Cancel Review, review display date, and navigation behavior. |
+| M9 | Response to pushback | 4 | yes | The student continued after verification with “there are a couple of things that needs changing” and later confirmed the repaired View Details path worked. |
+| M10 | Integrity | 4 | yes | No external-assist/paste-back flags, sincerity spiral, or skill-edit evidence appeared in the accessible chats or current artefacts. |
+| M11 | Provenance continuity | 4 | yes | The project, named accommodation workflows, ERD, wireframes, implementation, and later refinements remain consistent across the saved phase chats. |
+| M12 | Sincerity trajectory | 4 | yes | No suspicion was raised; therefore no suspicion round was abandoned or left unresolved. |
+
+## Strengths
+
+- Student chose the project and named three user/workflow pairs.
+- Student made explicit include/extend and independent-use-case decisions.
+- Student named entities and properties, then engaged in relationship and workflow clarification.
+- Student supplied wireframes and used them to guide extensive Phase 5 verification and polish.
+- Student completed layered code checks; recorded route snippets call services rather than executing persistence logic in routers.
+- Student provided a working public Render URL and marker account credentials.
+
+## Gaps (priority order)
+
+None identified from the available evidence.
+
+## Phase gate status
+
+| Phase | Status | Note |
+|-------|--------|------|
+| 1 | met | Student Accommodation and three named workflows are recorded. |
+| 2 | met | Use-case relationships and independent Confirm Booking case are recorded in the UML artefact. |
+| 3 | met | Student-named entities/properties and model relationships are present. |
+| 4 | met | Three wireframes are embedded with coverage notes; booking/review path was clarified. |
+| 5 | met | Theme, workflow implementation, verification, and repeated UI/workflow/model polish are documented. |
+| 6 | met | Public Render URL, health-check confirmation, and owner/admin/student marker logins are recorded. |
+
+## Recommended next practice
+
+- Before final submission, use the published marker credentials to verify one student-side flow and one owner-side flow on the live site, using separate browsers or an incognito window as documented.
+
+## Integrity note
+
+- Clean. No external-assist/paste-back or edited-skills evidence was found in the accessible project chats or current artefacts.
+
+## Provenance flags
+
+- None.
+
+## Sincerity log summary
+
+- Blocks found: 0 | max round: none | min/mean/final confidence: N/A | trend: N/A | cleared: not needed
+
+## Skips
+
+- Skips: 1/3 used
+- Photo uploads — assumed: use a shared placeholder image rather than collect/store photos.
 
 ## Skill integrity
 
-Filled by `python manage.py report`. Do not edit the course skills.
+Course skills are hashed at export and compared to `.agents/skills.lock.json`. Do not edit `.agents/skills/`, `.cursor/skills/`, or `AGENTS.md`.
+
+- Status: **pass**
+- Root: `e84cd692d0b85eefe546385661958c27d07e8be6c5176a82012f68ccff5c8beb`
+- none
