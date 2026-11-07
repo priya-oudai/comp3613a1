@@ -206,3 +206,4 @@ docs/transcripts.zip
 
 # Node (mermaid-cli). package.json + package-lock.json are committed.
 node_modules/
+owner_token.txt
