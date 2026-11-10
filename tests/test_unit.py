@@ -21,7 +21,6 @@ def test_encrypt_password():
     encrypted = encrypt_password("mypass")
     assert encrypted != "mypass"
 
-
 def test_check_password():
     encrypted = encrypt_password("mypass")
     assert verify_password("mypass", encrypted) == True
